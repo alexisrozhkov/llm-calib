@@ -1,0 +1,20 @@
+python rlhf.py \
+    --score_lambda 0.3 \
+    --train_dataset_path "hotpot_qa-fullwiki-train_dataset-onlymodelpreds-balanced10x1000.csv" \
+    --val_dataset_path "hotpot_qa-fullwiki-validation_dataset.csv" \
+    --model_name "trl-rlhf-05.27-11" \
+    --log_with "wandb" \
+    --learning_rate 1e-5 \
+    --batch_size 128 \
+    --mini_batch_size 4 \
+    --gradient_accumulation_steps 8 \
+    --optimize_device_cache \
+    --use_score_scaling \
+    --use_score_norm \
+    --score_clip 1.0 \
+    --remove_unused_columns 0 \
+    --tracker_project_name "llm-calib" \
+    --model_name_or_path "trl-sft-c/checkpoint-250-merged" \
+    --lora_r 16 \
+    --lora_alpha 32 \
+    --lora_dropout 0.05

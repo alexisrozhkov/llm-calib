@@ -1,0 +1,11 @@
+torch
+trl
+peft
+bitsandbytes
+xformers
+flash-attn
+accelerate
+git+https://github.com/google-research/bleurt.git
+evaluate
+wandb
+timeout-decorator

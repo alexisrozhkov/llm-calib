@@ -13,7 +13,7 @@ from evaluate import EvaluationModule
 from peft import LoraConfig
 from scipy.stats import pearsonr
 from tqdm.auto import tqdm
-from transformers import AutoTokenizer, PreTrainedTokenizerBase
+from transformers import AutoTokenizer, PreTrainedTokenizerBase, PreTrainedModel
 from trl import AutoModelForCausalLMWithValueHead, PPOConfig, PPOTrainer, ModelConfig
 from trl.commands.cli_utils import TrlParser
 
@@ -46,7 +46,13 @@ def load_and_tokenize_dataset(tokenizer: PreTrainedTokenizerBase, dataset_path: 
     return dataset
 
 
-def infer_single(model, tokenizer, question: str, max_pred_tokens: int, device: str = "cuda") -> str:
+def infer_single(
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizerBase,
+    question: str,
+    max_pred_tokens: int,
+    device: str = "cuda"
+) -> str:
     question_tokens = tokenizer([question,], return_tensors="pt").to(device)
     prompt_length = question_tokens['input_ids'].shape[1]
 
@@ -54,11 +60,12 @@ def infer_single(model, tokenizer, question: str, max_pred_tokens: int, device: 
     return tokenizer.decode(outputs[0][prompt_length:], skip_special_tokens=True)
 
 
-def parse_answer(resp: str) -> Tuple[Optional[str], Optional[float]]:
+def parse_answer(resp: str, debug: bool = False) -> Tuple[Optional[str], Optional[float]]:
     resp_lines = resp.split("\n")
 
     if len(resp_lines) != 2:
-        print("resp", resp)
+        if debug:
+            print("resp", resp)
         return resp, None
 
     pred = resp_lines[0]
@@ -68,7 +75,8 @@ def parse_answer(resp: str) -> Tuple[Optional[str], Optional[float]]:
         confidence_raw = float(confidence_str)
         confidence = np.clip(confidence_raw, 0, 1)
     except Exception:
-        print("resp_lines[1]", resp_lines[1])
+        if debug:
+            print("resp_lines[1]", resp_lines[1])
         return pred, None
 
     return pred, confidence
@@ -155,6 +163,7 @@ def main(script_args: ScriptArguments, config: PPOConfig, model_config: ModelCon
         load_in_4bit=False,
         device_map={"": "cuda"},
         peft_config=peft_config,
+        attn_implementation=model_config.attn_implementation,
     )
 
     tokenizer = AutoTokenizer.from_pretrained(model_config.model_name_or_path)

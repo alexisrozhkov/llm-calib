@@ -17,4 +17,5 @@ python rlhf.py \
     --model_name_or_path "trl-sft-c/checkpoint-250-merged" \
     --lora_r 16 \
     --lora_alpha 32 \
-    --lora_dropout 0.05
+    --lora_dropout 0.05 \
+    --attn_implementation "flash_attention_2"

@@ -1,3 +1,4 @@
+import os
 from dataclasses import field, dataclass
 from typing import Optional
 
@@ -53,9 +54,32 @@ def main(script_args: ScriptArguments, model_config: ModelConfig):
     }
 
     dataset_out = []
+    skip_ids = {}
+
+    if os.path.exists(script_args.output_csv_path):
+        print("loading", script_args.output_csv_path)
+        df = pd.read_csv(script_args.output_csv_path)
+
+        for _, row in df.iterrows():
+            skip_ids[row["question_id"]] = 1
+
+            labeled_example = {
+                "question_id": row["question_id"],
+                "question": row["question"],
+                "gt_answer": row["gt_answer"],
+                "pred_answer": row["pred_answer"],
+                "score": row["score"]
+            }
+
+            dataset_out.append(labeled_example)
+
+        print(f"loaded {len(dataset_out)} rows")
 
     for example in tqdm(dataset):
         question_id = example["question_id"]
+        if question_id in skip_ids:
+            continue
+
         question = example["question"]
         gt_answer = example["answer"]["value"]
 
@@ -69,7 +93,7 @@ def main(script_args: ScriptArguments, model_config: ModelConfig):
         if pred_answer[-1] == ".":
             pred_answer = pred_answer[:-1]
 
-        if pred_answer == gt_answer:
+        if pred_answer.lower() == gt_answer.lower():
             score = 1.0
         else:
             score_raw = oracle.compute(predictions=[pred_answer], references=[gt_answer])["scores"][0]

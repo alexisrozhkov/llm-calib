@@ -1,8 +1,9 @@
 python sft.py \
     --train_dataset_path "trivia_qa-rc.wikipedia.nocontext-train-balanced10x1000.csv" \
     --val_dataset_path "trivia_qa-rc.wikipedia.nocontext-validation-balanced10x100.csv" \
+    --wandb_project_name "llm-calib" \
     --output_dir "triviaqa-sft-balanced10x1000" \
-    --eval_strategy "epoch" \
+    --eval_strategy "steps" \
     --per_device_train_batch_size 4 \
     --per_device_eval_batch_size 4 \
     --gradient_accumulation_steps 4 \
@@ -12,6 +13,7 @@ python sft.py \
     --logging_steps 1 \
     --save_steps 10 \
     --fp16 \
+    --eval_steps 20 \
     --optim "adamw_8bit" \
     --report_to "wandb" \
     --model_name_or_path "meta-llama/Llama-2-7b-hf" \

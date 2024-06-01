@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 import torch
+import wandb
 from datasets import load_dataset
 from transformers import AutoTokenizer
 from transformers import TrainingArguments
@@ -20,9 +21,13 @@ class ScriptArguments:
     val_dataset_path: str = field(metadata={"help": "Path to a CSV file to be used as validation data"})
     prompt_format: Optional[str] = field(default="Q: {q}\nA: {a}\nTrue: {s:.1f}", metadata={"help": "Q/A/score format"})
     max_seq_length: Optional[int] = field(default=256, metadata={"help": "Maximum number of tokens in an example"})
+    wandb_project_name: Optional[str] = field(default="llm-calib", metadata={"help": "Q/A/score format"})
 
 
 def main(script_args: ScriptArguments, training_args: TrainingArguments, model_config: ModelConfig):
+    if "wandb" in training_args.report_to:
+        wandb.init(project=script_args.wandb_project_name)
+
     torch_dtype = (
         model_config.torch_dtype
         if model_config.torch_dtype in ["auto", None]

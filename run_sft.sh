@@ -1,6 +1,6 @@
 python sft.py \
     --train_dataset_path "trivia_qa-rc.wikipedia.nocontext-train-balanced10x1000.csv" \
-    --val_dataset_path "trivia_qa-rc.wikipedia.nocontext-validation-balanced10x1000.csv" \
+    --val_dataset_path "trivia_qa-rc.wikipedia.nocontext-validation-balanced10x100.csv" \
     --output_dir "triviaqa-sft-balanced10x1000" \
     --eval_strategy "epoch" \
     --per_device_train_batch_size 4 \
@@ -18,5 +18,5 @@ python sft.py \
     --torch_dtype "float16" \
     --attn_implementation "flash_attention_2" \
     --use_peft \
-    --lora_target_modules '["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]' \
+    --lora_target_modules "q_proj" "k_proj" "v_proj" "o_proj" "gate_proj" "up_proj" "down_proj" \
     --load_in_4bit

@@ -15,6 +15,7 @@ python rlhf.py \
     --remove_unused_columns 0 \
     --tracker_project_name "llm-calib" \
     --model_name_or_path "trl-sft-c/checkpoint-250-merged" \
+    --use_peft \
     --lora_r 16 \
     --lora_alpha 32 \
     --lora_dropout 0.05 \

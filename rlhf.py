@@ -10,11 +10,10 @@ import torch
 import wandb
 from datasets import load_dataset, Dataset
 from evaluate import EvaluationModule
-from peft import LoraConfig
 from scipy.stats import pearsonr
 from tqdm.auto import tqdm
 from transformers import AutoTokenizer, PreTrainedTokenizerBase, PreTrainedModel
-from trl import AutoModelForCausalLMWithValueHead, PPOConfig, PPOTrainer, ModelConfig
+from trl import AutoModelForCausalLMWithValueHead, PPOConfig, PPOTrainer, ModelConfig, get_peft_config
 from trl.commands.cli_utils import TrlParser
 
 
@@ -149,20 +148,12 @@ def save_with_timeout(trainer: PPOTrainer, save_directory: str):
 def main(script_args: ScriptArguments, config: PPOConfig, model_config: ModelConfig):
     oracle = evaluate.load("bleurt", config_name=script_args.oracle_model)
 
-    peft_config = LoraConfig(
-        r=model_config.lora_r,
-        lora_alpha=model_config.lora_alpha,
-        lora_dropout=model_config.lora_dropout,
-        task_type="CAUSAL_LM",
-        bias="none",
-    )
-
     model = AutoModelForCausalLMWithValueHead.from_pretrained(
         model_config.model_name_or_path,
         torch_dtype=torch.bfloat16,
         load_in_4bit=False,
         device_map={"": "cuda"},
-        peft_config=peft_config,
+        peft_config=get_peft_config(model_config),
         attn_implementation=model_config.attn_implementation,
     )
 

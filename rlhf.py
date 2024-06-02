@@ -26,7 +26,7 @@ class ScriptArguments:
     val_dataset_size: Optional[int] = field(default=512, metadata={"help": "Number of examples to use during validation"})
     score_lambda: Optional[float] = field(default=0.1, metadata={"help": "Oracle score coefficient in reward function"})
     oracle_model: Optional[str] = field(default="BLEURT-20", metadata={"help": "Type of BLEURT model to use"})
-    prompt_format: Optional[str] = field(default="Q: {question}\nA: ", metadata={"help": "Q/A prompt format"})
+    prompt_format: Optional[str] = field(default="Q: {question}\nA:", metadata={"help": "Q/A prompt format"})
     max_pred_tokens: Optional[int] = field(default=64, metadata={"help": "Maximum number of tokens to predict"})
     malformed_resp_reward: Optional[float] = field(default=-2.0, metadata={"help": "Reward assigned to malformed responses"})
 
@@ -36,7 +36,7 @@ def load_and_tokenize_dataset(tokenizer: PreTrainedTokenizerBase, dataset_path: 
 
     def tokenize(example):
         prompt = prompt_format.format(question=example["question"])
-        example["input_ids"] = tokenizer.encode(prompt)
+        example["input_ids"] = tokenizer(prompt)['input_ids']
         example["query"] = tokenizer.decode(example["input_ids"])
         return example
 
@@ -197,14 +197,14 @@ def main(script_args: ScriptArguments, config: PPOConfig, model_config: ModelCon
                 **generation_kwargs,
             )
 
-            response_strings = tokenizer.batch_decode(response_tensors, skip_special_tokens=True)
+            batch["response"] = tokenizer.batch_decode(response_tensors, skip_special_tokens=True)
 
             print("-" * 80)
             print("epoch", epoch)
             print("batch", batch_idx)
 
             rewards, scatter_log_data = eval_batch(
-                response_strings,
+                batch["response"],
                 batch["gt_answer"],
                 oracle,
                 script_args.score_lambda,

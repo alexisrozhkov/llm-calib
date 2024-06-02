@@ -10,6 +10,7 @@ python rlhf.py \
     --gradient_accumulation_steps 8 \
     --optimize_cuda_cache True \
     --model_name_or_path "triviaqa-sft-balanced10x1000/checkpoint-200-merged" \
+    --torch_dtype "bfloat16" \
     --attn_implementation "flash_attention_2" \
     --use_peft \
     --lora_target_modules "q_proj" "k_proj" "v_proj" "o_proj" "gate_proj" "up_proj" "down_proj"

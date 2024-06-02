@@ -13,8 +13,11 @@ from evaluate import EvaluationModule
 from scipy.stats import pearsonr
 from tqdm.auto import tqdm
 from transformers import AutoTokenizer, PreTrainedTokenizerBase, PreTrainedModel
-from trl import AutoModelForCausalLMWithValueHead, PPOConfig, PPOTrainer, ModelConfig, get_peft_config
+from trl import AutoModelForCausalLMWithValueHead, PPOConfig, PPOTrainer, ModelConfig, get_peft_config, \
+    get_quantization_config
 from trl.commands.cli_utils import TrlParser
+
+from postprocess_dataset import normalise_answer
 
 
 @dataclass
@@ -99,7 +102,15 @@ def eval_batch(
             reward_float = malformed_response_reward
 
         else:
-            score_raw = oracle.compute(predictions=[pred_text], references=[gt_resp])["scores"][0]
+            pred_normalised = normalise_answer(pred_text)
+            gt_normalised = normalise_answer(gt_resp)
+
+            if pred_normalised == gt_normalised:
+                score_raw = 1.0
+
+            else:
+                score_raw = oracle.compute(predictions=[pred_normalised], references=[gt_normalised])["scores"][0]
+
             score = np.clip(score_raw, 0, 1)
             reward_float = score_lambda * score - (score - pred_conf) ** 2
             scatter_log_data.append((pred_conf, score, gt_resp, pred_text))
@@ -148,10 +159,18 @@ def save_with_timeout(trainer: PPOTrainer, save_directory: str):
 def main(script_args: ScriptArguments, config: PPOConfig, model_config: ModelConfig):
     oracle = evaluate.load("bleurt", config_name=script_args.oracle_model)
 
+    torch_dtype = (
+        model_config.torch_dtype
+        if model_config.torch_dtype in ["auto", None]
+        else getattr(torch, model_config.torch_dtype)
+    )
+
+    quantization_config = get_quantization_config(model_config)
+
     model = AutoModelForCausalLMWithValueHead.from_pretrained(
         model_config.model_name_or_path,
-        torch_dtype=torch.bfloat16,
-        load_in_4bit=False,
+        torch_dtype=torch_dtype,
+        quantization_config=quantization_config,
         device_map={"": "cuda"},
         peft_config=get_peft_config(model_config),
         attn_implementation=model_config.attn_implementation,

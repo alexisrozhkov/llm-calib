@@ -24,6 +24,7 @@ from postprocess_dataset import normalise_answer
 class ScriptArguments:
     train_dataset_path: str = field(metadata={"help": "Path to a CSV file to be used as training data"})
     val_dataset_path: str = field(metadata={"help": "Path to a CSV file to be used as validation data"})
+    save_root: str = field(metadata={"help": "Root path for saving the checkpoints"})
     save_freq: Optional[int] = field(default=10, metadata={"help": "Number of iterations between checkpoint saves"})
     val_freq: Optional[int] = field(default=20, metadata={"help": "Number of iterations between validation runs"})
     val_dataset_size: Optional[int] = field(default=512, metadata={"help": "Number of examples to use during validation"})
@@ -32,6 +33,7 @@ class ScriptArguments:
     prompt_format: Optional[str] = field(default="Q: {question}\nA:", metadata={"help": "Q/A prompt format"})
     max_pred_tokens: Optional[int] = field(default=64, metadata={"help": "Maximum number of tokens to predict"})
     malformed_resp_reward: Optional[float] = field(default=-2.0, metadata={"help": "Reward assigned to malformed responses"})
+    max_epochs: Optional[int] = field(default=4, metadata={"help": "Maximum number of epochs to train for"})
 
 
 def load_and_tokenize_dataset(tokenizer: PreTrainedTokenizerBase, dataset_path: str, prompt_format: str) -> Dataset:
@@ -199,14 +201,14 @@ def main(script_args: ScriptArguments, config: PPOConfig, model_config: ModelCon
         "top_p": 1.0,  # no nucleus sampling
     }
 
-    save_dir = f"/content/drive/MyDrive/project/{config.model_name}"
+    save_dir = os.path.join(script_args.save_root, config.model_name)
     os.makedirs(save_dir, exist_ok=True)
 
     df_valid = pd.read_csv(script_args.val_dataset_path)
     validation_set = list(df_valid.iterrows())[:script_args.val_dataset_size]
 
     global_iter = 0
-    for epoch in range(10000):
+    for epoch in range(script_args.max_epochs):
         for batch_idx, batch in enumerate(ppo_trainer.dataloader):
             question_tensors = batch["input_ids"]
 

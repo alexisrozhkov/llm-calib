@@ -2,6 +2,7 @@ python rlhf.py \
     --train_dataset_path "trivia_qa-rc.wikipedia.nocontext-train-balanced10x1000.csv"  \
     --val_dataset_path "trivia_qa-rc.wikipedia.nocontext-validation-balanced10x100.csv" \
     --score_lambda 0.1 \
+    --save_root "/content/drive/MyDrive/project/" \
     --log_with "wandb" \
     --model_name "triviaqa-sft-balanced10x1000-06.02-20" \
     --remove_unused_columns False \

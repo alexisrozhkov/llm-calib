@@ -13,7 +13,9 @@ For reproducibility in the future:
 * `requirements.txt` is also provided, which is the output of `pip freeze` on the same type of instance
 
 ## Experiment Results
-Below are the highlighted experimental results
+Here's a [W&B dashboard](https://wandb.ai/alexisrozhkov/llm-calib/) with all the experiment logs.
+
+Below are some highlighted results:
 
 ### Score lambda = 0.01
 ![Lambda = 0.01](assets/calibration_lambda_0.01.svg)

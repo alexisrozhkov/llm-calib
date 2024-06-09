@@ -17,7 +17,7 @@ from trl import AutoModelForCausalLMWithValueHead, PPOConfig, PPOTrainer, ModelC
     get_quantization_config
 from trl.commands.cli_utils import TrlParser
 
-from postprocess_dataset import normalise_answer
+from src.postprocess_dataset import normalise_answer
 
 
 @dataclass

@@ -1,4 +1,4 @@
-python sft.py \
+python src/sft.py \
     --train_dataset_path "trivia_qa-rc.wikipedia.nocontext-train-balanced10x1000.csv" \
     --val_dataset_path "trivia_qa-rc.wikipedia.nocontext-validation-balanced10x100.csv" \
     --wandb_project_name "llm-calib" \

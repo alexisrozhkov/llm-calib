@@ -1,6 +1,6 @@
 # Can AI Call its Own Bluffs?
 
-The repository provides code for training the models, described in this [project](https://alexisrozhkov.notion.site/Can-AI-Call-its-Own-Bluffs-986fdda302db48c4956374a53a386f43).
+The repository provides code for training the models, described in this [report](https://alexisrozhkov.notion.site/Can-AI-Call-its-Own-Bluffs-986fdda302db48c4956374a53a386f43).
 
 ## Installation
 All experiments were conducted on Google Colab instance with L4 GPU, below is the command to install the required the dependencies:
